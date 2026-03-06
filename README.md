@@ -91,6 +91,14 @@ This query extracts important fields from raw Linux authentication logs and aggr
 
 -src_ip → source IP address
 
+Findings:
+
+-The results showed login attempts against four different user accounts, but one account was targeted significantly more than the others.
+
+-john.smith → 503 login attempts
+
+-This unusually high number strongly indicates a brute force attack targeting the john.smith account.
+
 # 🔍 Step 3 – Determine if the Attack Was Successful
 
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248
