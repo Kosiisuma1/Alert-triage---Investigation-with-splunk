@@ -112,7 +112,7 @@ Findings
 
 ## Screenshot
 
-![login attempts-by-user](images/login-attempts-by-user.png)
+![login attempts-by-user](images/successful-login_(1).png)
 
 🔍 Step 3 – Determine if the Attack Was Successful
 
