@@ -45,7 +45,6 @@ Observation:
 
 ## Query
 
-```spl
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248 
 | search "Accepted password for" OR "Failed password for" OR "Invalid user"
 | sort + _time
@@ -55,155 +54,164 @@ This query searches authentication events from the source IP.
 
 Filters:
 
-Accepted password for → successful login attempts
+- Accepted password for → successful login attempts
 
-Failed password for → failed login attempts
+- Failed password for → failed login attempts
 
-Invalid user → attempts with non-existent accounts
+- Invalid user → attempts with non-existent accounts
 
-Sorting chronologically helps visualize the sequence of login attempts.
+- Sorting chronologically helps visualize the sequence of login attempts.
 
 Findings
 
-Large number of authentication attempts
+- Large number of authentication attempts
 
-Multiple attempts targeting invalid usernames
+- Multiple attempts targeting invalid usernames
 
-Repeated login attempts from the same IP
+- Repeated login attempts from the same IP
 
-Attempts using invalid usernames indicate user enumeration, common before brute force attacks.
+- Attempts using invalid usernames indicate user enumeration, common before brute force attacks.
 
-Screenshot
+## Screenshot
+
+![Authentication Events](images/authentication-events.png)
 
 🔍 Step 2 – Identify Targeted User Accounts
+
 Query
+
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248
 | rex field=_raw "^\d{4}-\d{2}-\d{2}T[^\s]+\s+(?<log_hostname>\S+)"
 | rex field=_raw "sshd\[\d+\]:\s*(?<action>Failed|Accepted)\s+\S+\s+for(?: invalid user)? (?<username>\S+) from (?<src_ip>\d{1,3}(?:\.\d{1,3}){3})"
 | eval process="sshd"
 | stats count values(src_ip) as src_ip values(log_hostname) as hostname values(process) as process by username
+
 Explanation
 
-Extracts fields from logs using rex:
+- Extracts fields from logs using rex:
 
-log_hostname → host generating the log
+- log_hostname → host generating the log
 
-action → login result (Failed or Accepted)
+- action → login result (Failed or Accepted)
 
-username → targeted account
+- username → targeted account
 
-src_ip → source IP
+- src_ip → source IP
 
-eval process="sshd" labels the authentication process
+- eval process="sshd" labels the authentication process
 
-stats aggregates attempts by username
+- stats aggregates attempts by username
 
 Findings
 
-Four user accounts were targeted
+- Four user accounts were targeted
 
-john.smith → 503 login attempts
+- john.smith → 503 login attempts
 
-Indicates a brute force attack on john.smith
+- Indicates a brute force attack on john.smith
 
-Screenshot
+## Screenshot
+
+![login attempts-by-user](images/login-attempts-by-user.png)
 
 🔍 Step 3 – Determine if the Attack Was Successful
+
 Query
+
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248
 | rex field=_raw "^\d{4}-\d{2}-\d{2}T[^\s]+\s+(?<log_hostname>\S+)"
 | rex field=_raw "sshd\[\d+\]:\s*(?<action>Failed|Accepted)\s+\S+\s+for(?: invalid user)? (?<username>\S+) from (?<src_ip>\d{1,3}(?:\.\d{1,3}){3})"
 | eval process="sshd"
 | stats count values(action) values(src_ip) as src_ip values(log_hostname) as hostname values(process) as process by username
+
 Explanation
 
 This query also captures login results (Accepted or Failed) per user.
 
-Aggregates total attempts, actions, IP, hostname, process
+- Aggregates total attempts, actions, IP, hostname, process
 
-Determines if brute force attack led to successful login
+- Determines if brute force attack led to successful login
 
 Findings
 
-Account john.smith had both Failed and Accepted login attempts
+- Account john.smith had both Failed and Accepted login attempts
 
-Confirms attacker successfully logged in after multiple attempts
+- Confirms attacker successfully logged in after multiple attempts
 
-Screenshot
+![successful login.png](images/successful-login.png)
 
 📊 Final Analysis
 
-Hundreds of login attempts detected
+- Hundreds of login attempts detected
 
-User enumeration occurred
+- User enumeration occurred
 
-john.smith specifically targeted
+- john.smith specifically targeted
 
-Successful SSH login achieved
+- Successful SSH login achieved
 
 Alert represents a True Positive brute force attack
 
 🕒 Attack Timeline
 Time	Event
-09:00	Initial login attempts detected from 10.10.242.248
-09:01	Multiple failed SSH login attempts recorded
-09:03	Attempts using invalid usernames
-09:05	Brute force attempts increase against john.smith
-09:07	Successful login for john.smith
+- 09:00	Initial login attempts detected from 10.10.242.248
+- 09:01	Multiple failed SSH login attempts recorded
+- 09:03	Attempts using invalid usernames
+- 09:05	Brute force attempts increase against john.smith
+- 09:07	Successful login for john.smith
+
 🧠 MITRE ATT&CK Mapping
-Technique	ID	Description
-Brute Force	T1110	Repeated login attempts to guess account credentials
-Valid Accounts	T1078	Successful login using compromised credentials
-Initial Access	TA0001	Gaining initial access to the host through SSH
+- Technique	ID	Description
+- Brute Force	T1110	Repeated login attempts to guess account credentials
+- Valid Accounts	T1078	Successful login using compromised credentials
+- Initial Access	TA0001	Gaining initial access to the host through SSH
+
 🚩 Indicators of Compromise (IOCs)
-Indicator Type	Value
-Source IP	10.10.242.248
-Target Host	tryhackme-2404
-Target Account	john.smith
-Log Source	linux_secure
-Attack Type	SSH Brute Force
+- Indicator Type	Value
+- Source IP	10.10.242.248
+- Target Host	tryhackme-2404
+- Target Account	john.smith
+- Log Source	linux_secure
+- Attack Type	SSH Brute Force
+
 🛡 Detection Logic
 
-Detected high volume of failed SSH login attempts
+- Detected high volume of failed SSH login attempts
 
-Attempts using invalid usernames
+- Attempts using invalid usernames
 
-Multiple login attempts targeting a single user account
+- Multiple login attempts targeting a single user account
 
-Successful login following multiple failed attempts
+- Successful login following multiple failed attempts
 
-This logic triggered the Brute Force Activity Detection alert.
+- This logic triggered the Brute Force Activity Detection alert.
 
 🚑 Recommended Response Actions
 
-Disable or reset the compromised account (john.smith)
+- Disable or reset the compromised account (john.smith)
 
-Investigate source system (10.10.242.248)
+- Investigate source system (10.10.242.248)
 
-Review authentication logs for other suspicious activity
+- Review authentication logs for other suspicious activity
 
-Check for post-login privilege escalation attempts
+- Check for post-login privilege escalation attempts
 
-Implement account lockout policies to prevent brute force
+- Implement account lockout policies to prevent brute force
 
-Enforce multi-factor authentication (MFA) for SSH
+- Enforce multi-factor authentication (MFA) for SSH
 
 🛠 Tools Used
 
-Splunk SIEM
-
-Linux Secure Authentication Logs
-
-Splunk SPL (Search Processing Language)
+- Splunk SIEM
 
 📚 Skills Demonstrated
 
-SOC Alert Investigation
+- SOC Alert Investigation
 
-Splunk Log Analysis
+- Splunk Log Analysis
 
-Linux Authentication Log Analysis
+- Linux Authentication Log Analysis
 
-Brute Force Attack Detection
+- Brute Force Attack Detection
 
-Incident Classification
+- Incident Classification
