@@ -91,7 +91,7 @@ This query extracts important fields from raw Linux authentication logs and aggr
 
 -src_ip → source IP address
 
-🔍 Step 3 – Determine if the Attack Was Successful
+# 🔍 Step 3 – Determine if the Attack Was Successful
 
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248
 | rex field=_raw "^\d{4}-\d{2}-\d{2}T[^\s]+\s+(?<log_hostname>\S+)"
@@ -107,7 +107,7 @@ The results revealed that:
 
 -This confirms that the attacker successfully logged into the system after multiple brute force attempts.
 
-📊 Final Analysis
+# 📊 Final Analysis
 
 Based on the investigation:
 
