@@ -138,7 +138,7 @@ Findings
 
 - Confirms attacker successfully logged in after multiple attempts
 
-![successful login.png](images/successful-login.png)
+![successful-login](images/successful-login.png)
 
 📊 Final Analysis
 
