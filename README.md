@@ -72,6 +72,10 @@ The results showed:
 
 -Login attempts using invalid usernames suggest that the attacker was likely attempting user enumeration, a common technique used before performing a brute force attack.
 
+## Step 1 Results
+
+![Authentication Events](images/authentication-events.png)
+
 # 🔍 Step 2 – Identify Targeted User Accounts
 
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248
@@ -99,6 +103,10 @@ Findings:
 
 -This unusually high number strongly indicates a brute force attack targeting the john.smith account.
 
+## Login Attempts Per User
+
+![Login Attempts](images/login-attempts-by-user.png)
+
 # 🔍 Step 3 – Determine if the Attack Was Successful
 
 index="linux-alert" sourcetype="linux_secure" 10.10.242.248
@@ -114,6 +122,10 @@ The results revealed that:
 -The account john.smith had both Failed and Accepted login attempts.
 
 -This confirms that the attacker successfully logged into the system after multiple brute force attempts.
+
+## Login Attempts Per User
+
+![Successful login](images/successful-login.png)
 
 # 📊 Final Analysis
 
